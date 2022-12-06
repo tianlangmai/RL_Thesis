@@ -1,0 +1,13 @@
+ur5e:
+
+
+    n_action: 6
+    n_observation: 4
+    position_ee_max: 1.0
+    position_ee_min: 0.0
+
+    init_pos:
+      x: 0.6
+      y: -0.1
+    
+    position_delta: 0.03

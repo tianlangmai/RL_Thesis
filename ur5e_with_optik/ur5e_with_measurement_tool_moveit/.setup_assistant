@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: ur5e_with_measurement_tool
+    relative_path: urdf/ur5e_with_measurement_tool.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/ur5e_with_measurement_tool.srdf
+  CONFIG:
+    author_name: Jazmin Vivian Ramirez Jorges
+    author_email: jazmin.ramirez@llt.rwth-aachen.de
+    generated_timestamp: 1664972619

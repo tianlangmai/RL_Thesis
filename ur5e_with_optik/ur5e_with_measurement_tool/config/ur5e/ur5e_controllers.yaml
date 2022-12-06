@@ -1,0 +1,140 @@
+### THIS FILE MAY INCLUDE UNNECESSARY / EXCLUDE NECESSARY CONTROLLERS. IF YOU ENCOUNTER ANY PROBLEM CONTACT: edip.uenlueer@llt.rwth-aachen.de ###
+
+
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: &loop_hz 500
+
+
+optik_position_controller:
+  type: position_controllers/JointTrajectoryController
+  joints: &robot_joints
+    - shoulder_pan_joint
+    - shoulder_lift_joint
+    - elbow_joint
+    - wrist_1_joint
+    - wrist_2_joint
+    - wrist_3_joint
+  constraints:
+    goal_time: &goal_time_constraint 4.0
+    stopped_velocity_tolerance: 1.0
+    shoulder_pan_joint: {trajectory: &trajectory_pos_constraint 0.1, goal: &goal_pos_constraint 0.5}
+    shoulder_lift_joint: {trajectory: *trajectory_pos_constraint, goal: *goal_pos_constraint}
+    elbow_joint: {trajectory: *trajectory_pos_constraint, goal: *goal_pos_constraint}
+    wrist_1_joint: {trajectory: *trajectory_pos_constraint, goal: *goal_pos_constraint}
+    wrist_2_joint: {trajectory: *trajectory_pos_constraint, goal: *goal_pos_constraint}
+    wrist_3_joint: {trajectory: *trajectory_pos_constraint, goal: *goal_pos_constraint}
+  stop_trajectory_duration: 1.0
+  state_publish_rate: *loop_hz
+  action_monitor_rate: 10
+  gains:
+    shoulder_pan_joint:
+      p: &kp_default 16000
+      d: &kd_default 5.0
+      i: &ki_default 2.0
+      i_clamp: &i_clamp_default 2.0
+    shoulder_lift_joint:
+      p: *kp_default
+      d: *kd_default
+      i: *ki_default
+      i_clamp: *i_clamp_default
+    elbow_joint:
+      p: *kp_default
+      d: *kd_default
+      i: *ki_default
+      i_clamp: *i_clamp_default
+    wrist_1_joint:
+      p: *kp_default
+      d: *kd_default
+      i: *ki_default
+      i_clamp: *i_clamp_default
+    wrist_2_joint:
+      p: *kp_default
+      d: *kd_default
+      i: *ki_default
+      i_clamp: *i_clamp_default
+    wrist_3_joint:
+      p: *kp_default
+      d: *kd_default
+      i: *ki_default
+      i_clamp: *i_clamp_default
+
+#pos_joint_traj_controller:
+#  type: position_controllers/JointTrajectoryController
+#  joints: &robot_joints
+#    - shoulder_pan_joint
+#    - shoulder_lift_joint
+#    - elbow_joint
+#    - wrist_1_joint
+#    - wrist_2_joint
+#    - wrist_3_joint
+#  constraints:
+#    goal_time: 0.6
+#    stopped_velocity_tolerance: 0.05
+#    shoulder_pan_joint: {trajectory: 0.1, goal: 0.1}
+#    shoulder_lift_joint: {trajectory: 0.1, goal: 0.1}
+#    elbow_joint: {trajectory: 0.1, goal: 0.1}
+#    wrist_1_joint: {trajectory: 0.1, goal: 0.1}
+#    wrist_2_joint: {trajectory: 0.1, goal: 0.1}
+#    wrist_3_joint: {trajectory: 0.1, goal: 0.1}
+#  stop_trajectory_duration: 0.5
+#  state_publish_rate: *loop_hz
+#  action_monitor_rate: 10
+
+joint_group_pos_controller:
+  type: position_controllers/JointGroupPositionController
+  joints: *robot_joints
+
+#ur_hardware_interface:
+#   joints: *robot_joints
+
+#optik_velocity_controller:
+#   type: velocity_controllers/JointTrajectoryController
+#   joints: *robot_joints
+#   constraints:
+#      goal_time: 0.6
+#      stopped_velocity_tolerance: 0.05
+#      shoulder_pan_joint: {trajectory: 0.1, goal: 0.1}
+#      shoulder_lift_joint: {trajectory: 0.1, goal: 0.1}
+#      elbow_joint: {trajectory: 0.1, goal: 0.1}
+#      wrist_1_joint: {trajectory: 0.1, goal: 0.1}
+#      wrist_2_joint: {trajectory: 0.1, goal: 0.1}
+#      wrist_3_joint: {trajectory: 0.1, goal: 0.1}
+#   gains:
+#      #!!These values have not been optimized!!
+#      shoulder_pan_joint:  {p: 5.0,  i: 0.05, d: 0.1, i_clamp: 1}
+#      shoulder_lift_joint: {p: 5.0,  i: 0.05, d: 0.1, i_clamp: 1}
+#      elbow_joint:         {p: 5.0,  i: 0.05, d: 0.1, i_clamp: 1}
+#      wrist_1_joint:       {p: 5.0,  i: 0.05, d: 0.1, i_clamp: 1}
+#      wrist_2_joint:       {p: 5.0,  i: 0.05, d: 0.1, i_clamp: 1}
+#      wrist_3_joint:       {p: 5.0,  i: 0.05, d: 0.1, i_clamp: 1}
+#   # Use a feedforward term to reduce the size of PID gains
+#   velocity_ff:
+#      shoulder_pan_joint: 1.0
+#      shoulder_lift_joint: 1.0
+#      elbow_joint: 1.0
+#      wrist_1_joint: 1.0
+#      wrist_2_joint: 1.0
+#      wrist_3_joint: 1.0
+#   stop_trajectory_duration: 0.5
+#   state_publish_rate: *loop_hz
+#   action_monitor_rate: 20
+
+
+
+    
+#joint_group_pos_controller:
+#  type: position_controllers/JointGroupPositionController
+#  joints: *robot_joints
+ 
+# pose_based_cartesian_traj_controller:
+#     type: "position_controllers/CartesianTrajectoryController"
+#     base: "base"
+#     tip: "tcp"
+#     joints:
+#        - shoulder_pan_joint
+#        - shoulder_lift_joint
+#        - elbow_joint
+#        - wrist_1_joint
+#        - wrist_2_joint
+#        - wrist_3_joint

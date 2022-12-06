@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="https://ros.org/wiki/xacro">
+  <!-- Here we define the 2 parameters of the macro -->
+  <xacro:macro name="ur5e_optik" params="prefix connected_to">
+    <!-- Create a fixed joint with a parameterized name. -->
+    <joint name="${prefix}ur5e_optik_joint" type="fixed">
+      <!-- The parent link must be read from the robot model it is attached to. -->
+      <parent link="${connected_to}"/>
+      <child link="${prefix}ur5e_optik"/>
+      <!-- The tool is directly attached to the flange. -->
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+    <link name="${prefix}ur5e_optik">
+      <visual>
+        <geometry>
+          <!-- The path to the visual meshes in the package. -->
+          <mesh filename="package://ur5e_with_optik/meshes/visual/complete_optik.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <!-- The path to the collision meshes in the package. -->
+          <mesh filename="package://ur5e_with_optik/meshes/collision/complete_optik.stl"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="4.3" />
+        <origin xyz="-0.02105 -0.1014 -0.06991" />
+        <inertia ixx = "0.043001" ixy = "-0.001689" ixz = "-0.009057"
+                 iyy = "0.043001" iyz = "-0.003953"
+                 izz = "0.013061" />
+        </inertial>
+    </link>
+
+    <!-- TCP frame -->
+    <joint name="${prefix}tcp_joint" type="fixed">
+      <origin xyz="0 -0.1204 0.19357" rpy="0 0 0"/>
+      <parent link="${prefix}ur5e_optik"/>
+      <child link="${prefix}tcp"/>
+    </joint>
+    <link name="${prefix}tcp"/>
+
+  </xacro:macro>
+</robot>

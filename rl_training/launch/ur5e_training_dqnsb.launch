@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <!-- rosparam command="load" file="$(find fetch_openai_ros_example)/config/fetch_n1try_params_v2.yaml" /-->
+    <!-- Launch the training system -->
+    <node pkg="rl_training" name="ur5e_test_dqnsb" type="dqn_sb.py" output="screen"/>
+</launch>
