@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append("/home/tianlang/REL_project_ws/src/rl_env/src/")
+sys.path.append("/home/tianlang/RL_Thesis/src/rl_env/src/")
 #sys.path.append(r'../..')
 from openai_ros_common import StartOpenAI_ROS_Environment
 import rospy
