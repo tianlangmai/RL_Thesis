@@ -235,6 +235,9 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
             elif self.calculate_distance_between(desired_goal, current_pos) > self.ee_max_distance:
                 done = True
                 rospy.logdebug("Far away from desired position")
+            elif current_pos[2] < 0.05:
+                done = True
+                rospy.logdebug("Position is too low")
         else:
             done = True
             rospy.logdebug("Reached a TCP position not reachable")
@@ -279,7 +282,8 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
             rospy.logwarn("new_dist_from_des_pos_ee="+str(new_dist_from_des_pos_ee))
 
             delta_dist = new_dist_from_des_pos_ee - self.current_dist_from_des_pos_ee
-            reward = self.w_xaxis * (current_pos[0] - 0.6)**2 + self.w_yaxis * (current_pos[1]-0.1)**2
+            reward = self.w_xaxis * (current_pos[0] - 0.6)**2 + self.w_yaxis * (current_pos[1]-0.1)**2 + self.w_zaxis \
+                * (current_pos[2] - 0.1)**2
             if position_similar:
                 reward = self.reached_goal_reward
                 rospy.logwarn("Reached a desired position")
