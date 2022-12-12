@@ -29,7 +29,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
             When the optic tool reaches the goal or it is too far away from the goal, the environment will stop and
             restart again.
         """    
-        ros_ws_abspath = "/home/tianlang/RL_Thesis"
+        ros_ws_abspath = "/root/catkin_ws"
 
         # Run the launch file to start the gazabo world and moveit
         ROSLauncher(rospackage_name="ur5e_with_optik",

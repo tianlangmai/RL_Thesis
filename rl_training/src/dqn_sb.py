@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append("/home/tianlang/RL_Thesis/src/rl_env/src/")
+sys.path.append("/root/catkin_ws/src/RL_Thesis/rl_env/src/")
 from stable_baselines3 import DQN
 from stable_baselines3.common.utils import safe_mean
 from openai_ros_common import StartOpenAI_ROS_Environment
