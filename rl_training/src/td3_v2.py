@@ -170,10 +170,7 @@ if __name__ == '__main__':
         'eval_freq':{'value': 100},
         'max_timesteps':{'value':1000000},
         'lr_actor':{'value':3e-4},
-        'lr_critic':{'value':3e-4},
-        'w_xterm':{'distribution':'uniform', 'min':-10, 'max':-1},
-        'w_yterm':{'distribution':'uniform', 'min':-10, 'max':-1},
-        'w_zterm':{'distribution':'uniform', 'min':-10, 'max':-1}
+        'lr_critic':{'value':3e-4}
     }
 
     sweep_config['parameters'] = parameters_dict
@@ -183,9 +180,6 @@ if __name__ == '__main__':
     def train(config=None):
         with wandb.init(config=config):
             config = wandb.config
-            env.w_xaxis = config.w_xterm
-            env.w_yaxis = config.w_yterm
-            env.w_zaxis = config.w_zterm
             td3_training(env, load_model=False, save_model=True, 
                             seed=config.seed,
                             discount=config.discount,
