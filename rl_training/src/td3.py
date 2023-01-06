@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append("/root/catkin_ws/src/RL_Thesis/rl_env/src/")
+sys.path.append("/home/tianlang/RL_Thesis/src/rl_env/src/")
 from stable_baselines3 import TD3
 from stable_baselines3.common.noise import NormalActionNoise
 from stable_baselines3.common.utils import safe_mean
@@ -65,8 +65,21 @@ if __name__ == '__main__':
                             target_noise_clip=config.target_noise_clip,
                             wandb_tuning=True,
                             verbose=1)
-            model.learn(total_timesteps=20, log_interval=1)
+            model.learn(total_timesteps=10, log_interval=4)
             wandb.log({"rewards":safe_mean([ep_info["r"] for ep_info in model.ep_info_buffer])})
-            model.save("/home/tianlang/trained_models/td3_ur5e")
+            model.save("/home/tianlang/trained_models/td3_ur5e2")
     
     wandb.agent(sweep_id, train, count=5)
+
+    print("predict")
+    #del model
+
+    model = TD3.load("/home/tianlang/trained_models/td3_ur5e2")
+    for i in range (50):
+        obs, done = env.reset(), False
+        count = 0
+        while not done:
+            action, _states = model.predict(obs)
+            obs, reward, done, info = env.step(action, count)
+            count += 1
+            

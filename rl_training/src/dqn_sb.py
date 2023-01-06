@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append("/root/catkin_ws/src/RL_Thesis/rl_env/src/")
+sys.path.append("/home/tianlang/RL_Thesis/src/rl_env/src/")
 from stable_baselines3 import DQN
 from stable_baselines3.common.utils import safe_mean
 from openai_ros_common import StartOpenAI_ROS_Environment
@@ -66,19 +66,19 @@ if __name__ == '__main__':
             wandb.log({"rewards":safe_mean([ep_info["r"] for ep_info in model.ep_info_buffer])})
             model.save("/home/tianlang/trained_models/dqn2_ur5e")
     
-    wandb.agent(sweep_id, train, count=5)
+    wandb.agent(sweep_id, train, count=1)
 
-    
+    print("predict")
     #del model
 
-    #model = DQN.load("/home/tianlang/trained_models/dqn2_ur5e")
+    model = DQN.load("/home/tianlang/trained_models/dqn2_ur5e")
 
-    #obs = env.reset()
+    obs = env.reset()
 
-    '''while True:
+    while True:
         action, _states = model.predict(obs, deterministic=True)
         obs, reward, done, info = env.step(action)
         #env.render()
         if done:
-            obs = env.reset()'''
+            obs = env.reset()
     
