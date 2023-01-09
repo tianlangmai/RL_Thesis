@@ -2,5 +2,5 @@
 <launch>
     <!-- rosparam command="load" file="$(find fetch_openai_ros_example)/config/fetch_n1try_params_v2.yaml" /-->
     <!-- Launch the training system -->
-    <node pkg="rl_training" name="ur5e_td3_v2" type="td3_v2.py" output="screen"/>
+    <node pkg="rl_training" name="ur5e_td3_v2" type="td3_v3.py" output="screen"/>
 </launch>

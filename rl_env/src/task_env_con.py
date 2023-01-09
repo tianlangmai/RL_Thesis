@@ -60,7 +60,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         #self.w_xaxis = -7
         #self.w_yaxis = -3
         self.ee_max_distance = 0.28
-        self.weight_distance = 100
+        self.weight_distance = 500
         #self.w_zaxis = -5
         self.action_bound = 0.1
         action_upper = np.array([self.action_bound] * self.n_actions)
