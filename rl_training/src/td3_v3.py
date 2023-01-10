@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append("/root/catkin_ws/src/tianlang/RL_Thesis/src/rl_env/src/")
+sys.path.append("/root/catkin_ws/src//RL_Thesis/src/rl_env/src/")
 sys.path.append("/root/catkin_ws/src/RL_Thesis/src/rl_training/src/TD3/")
 from openai_ros_common import StartOpenAI_ROS_Environment
 import numpy as np
