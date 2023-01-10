@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append("/home/tianlang/RL_Thesis/src/rl_env/src/")
-sys.path.append("/home/tianlang/RL_Thesis/src/rl_training/src/TD3/")
+sys.path.append("/root/catkin_ws/src/tianlang/RL_Thesis/src/rl_env/src/")
+sys.path.append("/root/catkin_ws/src/RL_Thesis/src/rl_training/src/TD3/")
 from openai_ros_common import StartOpenAI_ROS_Environment
 import numpy as np
 import torch
@@ -18,25 +18,22 @@ import wandb
 # Runs policy for X episodes and returns average reward
 # A fixed seed is used for the eval environment
 def eval_policy(policy, eval_env, seed, eval_episodes=10):
-	#eval_env = StartOpenAI_ROS_Environment(env_name)
-	eval_env.seed(seed + 100)
+    eval_env.seed(seed + 100)
+    total_reward = 0
+    for _ in range(eval_episodes):
+        eval_episodes_timestep = 0
+        state, done = eval_env.reset(eval_episodes_timestep), False
+        while not done:
+            eval_episodes_timestep += 1
+            action = policy.select_action(np.array(state))
+            state, reward, done, _ = eval_env.step(action, eval_episodes_timestep)
+            total_reward += reward
+    avg_reward = total_reward / eval_episodes_timestep
 
-	avg_reward = 0.
-	for _ in range(eval_episodes):
-		state, done = eval_env.reset(), False
-		eval_episodes_timestep = 0
-		while not done:
-			eval_episodes_timestep += 1
-			action = policy.select_action(np.array(state))
-			state, reward, done, _ = eval_env.step(action, eval_episodes_timestep)
-			avg_reward += reward
-	
-	avg_reward /= reward
-
-	print("------------------------------------")
-	print(f"Evaluation over {eval_episodes} episodes: {avg_reward:.3f}")
-	print("------------------------------------")
-	return avg_reward
+    print("------------------------------------")
+    print(f"Evaluation over {eval_episodes} episodes: {avg_reward:.3f}")
+    print("------------------------------------")
+    return avg_reward
 
 def td3_training(env, load_model, save_model, seed, discount, tau, batch_size, policy_noise, 
                     noise_clip, policy_freq, start_timesteps, max_timesteps, eval_freq, 
@@ -49,11 +46,11 @@ def td3_training(env, load_model, save_model, seed, discount, tau, batch_size, p
     print(f"Policy: TD3, Env: UR5eTask-v3_0, Seed: {seed}")
     print("---------------------------------------")
 
-    if not os.path.exists("/home/tianlang/trained_models/results"):
-        os.makedirs("/home/tianlang/trained_models/results")
+    if not os.path.exists("/root/trained_models/results"):
+        os.makedirs("/root/trained_models/results")
 
-    if save_model and not os.path.exists("/home/tianlang/trained_models/models"):
-        os.makedirs("/home/tianlang/trained_models/models")
+    if save_model and not os.path.exists("/root/trained_models/models"):
+        os.makedirs("/root/trained_models/models")
 
     #env = gym.make(args.env)
 
@@ -91,16 +88,16 @@ def td3_training(env, load_model, save_model, seed, discount, tau, batch_size, p
 
     if load_model:
         policy_file = file_name #if args.load_model == "default" else args.load_model
-        policy.load(f"/home/tianlang/trained_models/models/{policy_file}")
+        policy.load(f"/root/trained_models/models/{policy_file}")
 
     replay_buffer = utils.ReplayBuffer(state_dim, action_dim)
     
     # Evaluate untrained policy
     evaluations = [eval_policy(policy, env, seed)]
 
-    state, done = env.reset(), False
-    episode_reward = 0
     episode_timesteps = 0
+    state, done = env.reset(episode_timesteps), False
+    episode_reward = 0
     episode_num = 0
 
     for t in range(int(max_timesteps)):
@@ -134,22 +131,23 @@ def td3_training(env, load_model, save_model, seed, discount, tau, batch_size, p
             # +1 to account for 0 indexing. +0 on ep_timesteps since it will increment +1 even if done=True
             print(f"Total T: {t+1} Episode Num: {episode_num+1} Episode T: {episode_timesteps} Reward: {episode_reward:.3f}")
             # Reset environment
-            state, done = env.reset(), False
-            episode_reward = 0
             episode_timesteps = 0
+            state, done = env.reset(episode_timesteps), False
+            episode_reward = 0
+            #episode_timesteps = 0
             episode_num += 1 
 
         # Evaluate episode
         if (t + 1) % eval_freq == 0:
             eval_values = eval_policy(policy, env, seed)
             evaluations.append(eval_values)
-            wandb.log({"avg_reward":eval_values})
-            np.save(f"/home/tianlang/trained_models/results/{file_name}", evaluations)
-            if save_model: policy.save(f"/home/tianlang/trained_models/models/{file_name}")
+            #wandb.log({"avg_reward":eval_values})
+            np.save(f"/root/trained_models/results/{file_name}", evaluations)
+            if save_model: policy.save(f"/root/trained_models/models/{file_name}")
 
 if __name__ == '__main__':
     rospy.init_node('ur5e_td3_v2',
-                    anonymous=True, log_level=rospy.WARN)
+                    anonymous=True)
     env = StartOpenAI_ROS_Environment('UR5eTask-v3')
     td3_training(env, 
                 load_model=False, 

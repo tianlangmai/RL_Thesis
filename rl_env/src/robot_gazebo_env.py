@@ -66,7 +66,7 @@ class RobotGazeboEnv(gym.Env):
         self.gazebo.unpauseSim()
         self._set_action(action)
         self.gazebo.pauseSim()
-        obs = self._get_obs()
+        obs = self._get_obs(count)
         done = self._is_done(obs, count)
         info = {}
         reward = self._compute_reward(obs, done, count)
@@ -76,12 +76,12 @@ class RobotGazeboEnv(gym.Env):
 
         return obs, reward, done, info
 
-    def reset(self):
+    def reset(self, count):
         rospy.logdebug("Reseting RobotGazeboEnvironment")
         self._reset_sim()
         self._init_env_variables()
         self._update_episode()
-        obs = self._get_obs()
+        obs = self._get_obs(count)
         rospy.logdebug("END Reseting RobotGazeboEnvironment")
         return obs
 
@@ -100,7 +100,7 @@ class RobotGazeboEnv(gym.Env):
         increases the episode number by one.
         :return:
         """
-        rospy.logwarn("PUBLISHING REWARD...")
+        #rospy.logwarn("PUBLISHING REWARD...")
 
         #plt.ion
 
@@ -123,7 +123,7 @@ class RobotGazeboEnv(gym.Env):
                                     self.cumulated_episode_reward,
                                     self.episode_num
                                     )
-        rospy.logwarn("PUBLISHING REWARD...DONE="+str(self.cumulated_episode_reward)+",EP="+str(self.episode_num))
+        #rospy.logwarn("PUBLISHING REWARD...DONE="+str(self.cumulated_episode_reward)+",EP="+str(self.episode_num))
 
         self.episode_num += 1
         self.cumulated_episode_reward = 0
@@ -163,7 +163,7 @@ class RobotGazeboEnv(gym.Env):
             self.gazebo.pauseSim()
 
         else:
-            rospy.logwarn("DONT RESET CONTROLLERS")
+            #rospy.logwarn("DONT RESET CONTROLLERS")
             self.gazebo.unpauseSim()
             self._check_all_systems_ready()
             self._set_init_pose()

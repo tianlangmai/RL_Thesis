@@ -29,7 +29,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
             When the optic tool reaches the goal or it is too far away from the goal, the environment will stop and
             restart again.
         """    
-        ros_ws_abspath = "/home/tianlang/RL_Thesis"
+        ros_ws_abspath = "/root/catkin_ws"
 
         # Run the launch file to start the gazabo world and moveit
         ROSLauncher(rospackage_name="ur5e_with_optik",
@@ -65,7 +65,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         self.action_bound = 0.1
         action_upper = np.array([self.action_bound] * self.n_actions)
         self.action_space = spaces.Box(-action_upper, action_upper)
-
+        self.reference_trajectory = self.set_reference_array(self.startpoint, self.desired_goal, 100)
         observations_high_range = np.array(
             [self.position_ee_max]*self.n_observations)
         observations_low_range = np.array(
@@ -152,10 +152,10 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         else:
             rospy.logerr("Impossible Joints Position......" + str(joints_action))
         
-        rospy.logwarn("END Set Action ===>" + str(action) + ", NAME="+str(self.last_action))
+        #rospy.logwarn("END Set Action ===>" + str(action) + ", NAME="+str(self.last_action))
 
     
-    def _get_obs(self):
+    def _get_obs(self, count):
         """After the robot performed an action, we read the observation
 
         Returns:
@@ -169,11 +169,11 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
 
         obs = optik_pose_array
 
-        new_dist_from_des_pos_ee = self.calculate_distance_between(self.desired_goal, optik_pose_array)
+        new_dist_from_des_pos_ee = self.calculate_distance_between(self.reference_trajectory[count], optik_pose_array)
 
         obs.append(new_dist_from_des_pos_ee)
 
-        rospy.logdebug("OBSERVATIONS====>>>>>>>"+str(obs))
+        #rospy.logdebug("OBSERVATIONS====>>>>>>>"+str(obs))
 
         return obs
 
@@ -211,7 +211,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         reward = self.calculate_reward(
             self.movement_result, self.desired_goal, current_pos, new_dis_from_des_pos_ee, count)
         
-        rospy.logwarn(">>>REWARD>>>"+str(reward))
+        #rospy.logwarn(">>>REWARD>>>"+str(reward))
 
         return reward
 
@@ -281,33 +281,33 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
 
         if movement_result:
             position_similar = np.all(np.isclose(desired_goal, current_pos, atol=0.01))
-            startpoint = copy.deepcopy(self.startpoint)
-            desired_goal = copy.deepcopy(self.desired_goal)
-            reference_trajectory = self.set_reference_array(startpoint, desired_goal, 100)
-            rospy.logwarn("desired_goal="+str(desired_goal))
-            rospy.logwarn("current_pos="+str(current_pos))
-            rospy.logwarn("current_dist_from_des_pos_ee="+str(self.current_dist_from_des_pos_ee))
-            rospy.logwarn("new_dist_from_des_pos_ee="+str(new_dist_from_des_pos_ee))
-            rospy.logwarn("current_reference_point="+str(reference_trajectory[count]))
+            #startpoint = copy.deepcopy(self.startpoint)
+            #desired_goal = copy.deepcopy(self.desired_goal)
+            #reference_trajectory = self.set_reference_array(startpoint, desired_goal, 100)
+            #rospy.logwarn("desired_goal="+str(desired_goal))
+            #rospy.logwarn("current_pos="+str(current_pos))
+            #rospy.logwarn("current_dist_from_des_pos_ee="+str(self.current_dist_from_des_pos_ee))
+            #rospy.logwarn("new_dist_from_des_pos_ee="+str(new_dist_from_des_pos_ee))
+            #rospy.logwarn("current_reference_point="+str(reference_trajectory[count]))
 
             delta_dist = new_dist_from_des_pos_ee - self.current_dist_from_des_pos_ee
-            reward = -self.weight_distance * self.calculate_distance_between(current_pos, reference_trajectory[count])
+            reward = -self.weight_distance * self.calculate_distance_between(current_pos, self.reference_trajectory[count])
             '''reward = self.w_xaxis * (current_pos[0] + 0.6)**2 + self.w_yaxis * (current_pos[1]-0.1)**2 + self.w_zaxis \
                 * (current_pos[2] - 0.1)**2'''
-            rospy.logwarn("dist from references = "+str(self.calculate_distance_between(current_pos, reference_trajectory[count])))
+            #rospy.logwarn("dist from references = "+str(self.calculate_distance_between(current_pos, reference_trajectory[count])))
             if position_similar:
                 reward = self.reached_goal_reward
-                rospy.logwarn("Reached a desired position")
+                #rospy.logwarn("Reached a desired position")
             else:
                 if delta_dist < 0:
                     reward += self.closer_reward
-                    rospy.logwarn("CLOSER to desired position="+str(delta_dist))
+                    #rospy.logwarn("CLOSER to desired position="+str(delta_dist))
                 else:
                     reward += self.step_punishment
-                    rospy.logwarn("FURTHER from desired position="+str(delta_dist))
+                    #rospy.logwarn("FURTHER from desired position="+str(delta_dist))
         else:
             reward = self.impossible_movement_punishment
-            rospy.logwarn("Reach TCP no reachable")
+            #rospy.logwarn("Reach TCP no reachable")
 
         self.current_dist_from_des_pos_ee = new_dist_from_des_pos_ee
         rospy.logdebug("Updated distance from Goal=="+str(new_dist_from_des_pos_ee))
