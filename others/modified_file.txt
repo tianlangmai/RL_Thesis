@@ -1,0 +1,9 @@
+real time factor: /usr/share/gazebo-11/worlds/empty.world
+    <physics type='ode'>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>2</real_time_factor>
+      <real_time_update_rate>1500</real_time_update_rate>
+    </physics>
+
+logging level: /opt/ros/noetic/share/ros/config/rosconsole.config
+    log4j.threshold = OFF
