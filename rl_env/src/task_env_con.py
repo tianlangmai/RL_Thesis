@@ -66,6 +66,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         action_upper = np.array([self.action_bound] * self.n_actions)
         self.action_space = spaces.Box(-action_upper, action_upper)
         self.reference_trajectory = self.set_reference_array(self.startpoint, self.desired_goal, 100)
+        #print(self.reference_trajectory)
         observations_high_range = np.array(
             [self.position_ee_max]*self.n_observations)
         observations_low_range = np.array(
@@ -87,7 +88,8 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
     def set_reference_array(self, startpoint, endpoint, step):
 
         reference_array = []
-        reference_array.append(startpoint)
+        start_point = copy.deepcopy(startpoint)
+        reference_array.append(start_point)
         interval = (endpoint[1] - startpoint[1])/step
         for i in range(step):
             startpoint[1] = startpoint[1] + interval
@@ -172,6 +174,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         new_dist_from_des_pos_ee = self.calculate_distance_between(self.reference_trajectory[count], optik_pose_array)
 
         obs.append(new_dist_from_des_pos_ee)
+        #print(obs)
 
         #rospy.logdebug("OBSERVATIONS====>>>>>>>"+str(obs))
 
