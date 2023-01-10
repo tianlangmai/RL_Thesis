@@ -22,6 +22,7 @@ def eval_policy(policy, eval_env, seed, eval_episodes=10):
     total_reward = 0
     for _ in range(eval_episodes):
         eval_episodes_timestep = 0
+        #print("reset")
         state, done = eval_env.reset(eval_episodes_timestep), False
         while not done:
             eval_episodes_timestep += 1
