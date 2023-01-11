@@ -29,7 +29,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
             When the optic tool reaches the goal or it is too far away from the goal, the environment will stop and
             restart again.
         """    
-        ros_ws_abspath = "/root/catkin_ws"
+        ros_ws_abspath = "/home/tianlang/RL_Thesis"
 
         # Run the launch file to start the gazabo world and moveit
         ROSLauncher(rospackage_name="ur5e_with_optik",
@@ -53,16 +53,16 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         self.position_delta = 0.01
         self.startpoint = [-0.6, -0.1, 0.1]
         self.desired_goal = [-0.6, 0.1, 0.1]
-        self.step_punishment = -10
-        self.closer_reward = 10
+        self.step_punishment = -50
+        self.closer_reward = 50
         self.impossible_movement_punishment = -100
-        self.reached_goal_reward = 20 
+        self.reached_goal_reward = 100 
         #self.w_xaxis = -7
         #self.w_yaxis = -3
         self.ee_max_distance = 0.28
         self.weight_distance = 500
         #self.w_zaxis = -5
-        self.action_bound = 0.1
+        self.action_bound = 0.02
         action_upper = np.array([self.action_bound] * self.n_actions)
         self.action_space = spaces.Box(-action_upper, action_upper)
         self.reference_trajectory = self.set_reference_array(self.startpoint, self.desired_goal, 100)
@@ -98,7 +98,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         
         return np.array(reference_array, dtype=np.float32)
 
-    def _set_init_pose(self):
+    def _set_init_pose(self, count):
         """reset the robot to inital pose when we call the reset function within the environment
 
         Returns:
@@ -114,7 +114,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
                                     self.get_ee_pose().pose.position.z]
 
         
-        self.current_dist_from_des_pos_ee = self.calculate_distance_between(self.desired_goal, 
+        self.current_dist_from_des_pos_ee = self.calculate_distance_between(self.reference_trajectory[count], 
                                 self.last_optik_target)
         
 
@@ -239,7 +239,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
             if position_similar:
                 done = True
                 rospy.logdebug("Reach a Desired Position")
-            elif self.calculate_distance_between(desired_goal, current_pos) > self.ee_max_distance:
+            elif self.calculate_distance_between(self.reference_trajectory[count], current_pos) > self.ee_max_distance:
                 done = True
                 rospy.logdebug("Far away from desired position")
             elif current_pos[2] < 0.01:
@@ -283,7 +283,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         """              
 
         if movement_result:
-            position_similar = np.all(np.isclose(desired_goal, current_pos, atol=0.01))
+            position_similar = np.all(np.isclose(self.reference_trajectory[count], current_pos, atol=0.01))
             #startpoint = copy.deepcopy(self.startpoint)
             #desired_goal = copy.deepcopy(self.desired_goal)
             #reference_trajectory = self.set_reference_array(startpoint, desired_goal, 100)
@@ -299,7 +299,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
                 * (current_pos[2] - 0.1)**2'''
             #rospy.logwarn("dist from references = "+str(self.calculate_distance_between(current_pos, reference_trajectory[count])))
             if position_similar:
-                reward = self.reached_goal_reward
+                reward += self.reached_goal_reward
                 #rospy.logwarn("Reached a desired position")
             else:
                 if delta_dist < 0:

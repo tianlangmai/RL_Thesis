@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append("/root/catkin_ws/src//RL_Thesis/src/rl_env/src/")
-sys.path.append("/root/catkin_ws/src/RL_Thesis/src/rl_training/src/TD3/")
+sys.path.append("/home/tianlang/RL_Thesis/src/rl_env/src/")
+sys.path.append("/home/tianlang/RL_Thesis/src/rl_training/src/TD3/")
 from openai_ros_common import StartOpenAI_ROS_Environment
 import numpy as np
 import torch
@@ -22,7 +22,7 @@ def eval_policy(policy, eval_env, seed, eval_episodes=10):
     total_reward = 0
     for _ in range(eval_episodes):
         eval_episodes_timestep = 0
-        #print("reset")
+    
         state, done = eval_env.reset(eval_episodes_timestep), False
         while not done:
             eval_episodes_timestep += 1
@@ -47,11 +47,11 @@ def td3_training(env, load_model, save_model, seed, discount, tau, batch_size, p
     print(f"Policy: TD3, Env: UR5eTask-v3_0, Seed: {seed}")
     print("---------------------------------------")
 
-    if not os.path.exists("/root/trained_models/results"):
-        os.makedirs("/root/trained_models/results")
+    if not os.path.exists("/home/tianlang/trained_models/results"):
+        os.makedirs("/home/tianlang/trained_models/results")
 
-    if save_model and not os.path.exists("/root/trained_models/models"):
-        os.makedirs("/root/trained_models/models")
+    if save_model and not os.path.exists("/home/tianlang/trained_models/models"):
+        os.makedirs("/home/tianlang/trained_models/models")
 
     #env = gym.make(args.env)
 
@@ -89,7 +89,7 @@ def td3_training(env, load_model, save_model, seed, discount, tau, batch_size, p
 
     if load_model:
         policy_file = file_name #if args.load_model == "default" else args.load_model
-        policy.load(f"/root/trained_models/models/{policy_file}")
+        policy.load(f"/home/tianlang/trained_models/models/{policy_file}")
 
     replay_buffer = utils.ReplayBuffer(state_dim, action_dim)
     
@@ -143,8 +143,8 @@ def td3_training(env, load_model, save_model, seed, discount, tau, batch_size, p
             eval_values = eval_policy(policy, env, seed)
             evaluations.append(eval_values)
             #wandb.log({"avg_reward":eval_values})
-            np.save(f"/root/trained_models/results/{file_name}", evaluations)
-            if save_model: policy.save(f"/root/trained_models/models/{file_name}")
+            np.save(f"/home/tianlang/trained_models/results/{file_name}", evaluations)
+            if save_model: policy.save(f"/home/tianlang/trained_models/models/{file_name}")
 
 if __name__ == '__main__':
     rospy.init_node('ur5e_td3_v2',
@@ -152,17 +152,17 @@ if __name__ == '__main__':
     env = StartOpenAI_ROS_Environment('UR5eTask-v3')
     td3_training(env, 
                 load_model=False, 
-                save_model=True,
-                start_timesteps=50, 
-                expl_noise=0.01,
+                save_model=False,
+                start_timesteps=25e3, 
+                expl_noise=0.001,
                 tau=0.005,
                 seed=0,
                 discount=0.99,
-                batch_size=64,
-                policy_noise=0.2,
-                policy_freq=20,
-                noise_clip=0.05,
-                eval_freq=200,
-                max_timesteps=1000,
-                lr_actor=3e-3,
-                lr_critic=3e-3)      
+                batch_size=256,
+                policy_noise=0.002,
+                policy_freq=2,
+                noise_clip=0.005,
+                eval_freq=5e3,
+                max_timesteps=1e6,
+                lr_actor=3e-4,
+                lr_critic=3e-4)      

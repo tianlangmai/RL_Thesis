@@ -78,7 +78,7 @@ class RobotGazeboEnv(gym.Env):
 
     def reset(self, count):
         rospy.logdebug("Reseting RobotGazeboEnvironment")
-        self._reset_sim()
+        self._reset_sim(count)
         self._init_env_variables()
         self._update_episode()
         obs = self._get_obs(count)
@@ -145,7 +145,7 @@ class RobotGazeboEnv(gym.Env):
     # Extension methods
     # ----------------------------
 
-    def _reset_sim(self):
+    def _reset_sim(self, count):
         """Resets a simulation
         """
         rospy.logdebug("RESET SIM START")
@@ -166,7 +166,7 @@ class RobotGazeboEnv(gym.Env):
             #rospy.logwarn("DONT RESET CONTROLLERS")
             self.gazebo.unpauseSim()
             self._check_all_systems_ready()
-            self._set_init_pose()
+            self._set_init_pose(count)
             self.gazebo.pauseSim()
             self.gazebo.resetSim()
             self.gazebo.unpauseSim()
