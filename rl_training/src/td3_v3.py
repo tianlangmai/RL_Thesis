@@ -128,7 +128,7 @@ def td3_training(env, load_model, save_model, seed, discount, tau, batch_size, p
 
         state = next_state
         episode_reward += reward
-        dt += 0.01
+        dt += 0.008
 
         # Train agent after collecting sufficient data
         if t >= start_timesteps:

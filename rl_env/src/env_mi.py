@@ -63,7 +63,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         self.ee_max_distance = 0.28
         self.weight_distance = 10000
         #self.w_zaxis = -5
-        self.action_bound = 0.0001
+        self.action_bound = 0.001
         action_upper = np.array([self.action_bound] * self.n_actions)
         self.action_space = spaces.Box(-action_upper, action_upper)
         self.reference_trajectory = self.set_reference_array(self.startpoint, self.desired_goal, 100)
@@ -248,7 +248,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
 
         if movement_result:
             position_similar = np.all(np.isclose(
-                desired_goal, current_pos, atol=0.01))
+                desired_goal, current_pos, atol=0.005))
             
             if position_similar:
                 done = True
