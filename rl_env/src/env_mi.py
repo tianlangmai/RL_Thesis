@@ -61,12 +61,13 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         #self.w_xaxis = -7
         #self.w_yaxis = -3
         self.ee_max_distance = 0.28
-        self.weight_distance = 10000
+        self.weight_distance = 1000
         #self.w_zaxis = -5
         self.action_bound = 0.001
         action_upper = np.array([self.action_bound] * self.n_actions)
         self.action_space = spaces.Box(-action_upper, action_upper)
-        self.reference_trajectory = self.set_reference_array(self.startpoint, self.desired_goal, 100)
+        self.count = 644
+        self.reference_trajectory = self.set_reference_array(self.startpoint, self.desired_goal, self.count)
         #print(self.reference_trajectory)
         observations_high_range = np.array(
             [self.position_ee_max]*self.n_observations)
@@ -248,7 +249,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
 
         if movement_result:
             position_similar = np.all(np.isclose(
-                desired_goal, current_pos, atol=0.005))
+                desired_goal, current_pos, atol=0.0))
             
             if position_similar:
                 done = True
@@ -259,7 +260,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
             elif current_pos[2] < 0.01:
                 done = True
                 rospy.logdebug("Position is too low")
-            elif count == 100:
+            elif count == self.count:
                 done = True
         else:
             done = True
