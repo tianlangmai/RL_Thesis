@@ -7,3 +7,8 @@ real time factor: /usr/share/gazebo-11/worlds/empty.world
 
 logging level: /opt/ros/noetic/share/ros/config/rosconsole.config
     log4j.threshold = OFF
+
+polynomial equation:
+elbow: 0.0179t3 - 0.0336t2 - 0.0102t - 2.005
+shoulder_lift: -0.0168t3 + 0.0315t2 + 0.0094t - 1.6615
+shoulder_pan: 0.2449t3 - 0.4595t2 - 0.1396t + 0.5448

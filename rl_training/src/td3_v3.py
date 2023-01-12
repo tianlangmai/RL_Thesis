@@ -8,6 +8,7 @@ import torch
 import gym
 import argparse
 import os
+import time
 
 import utils
 import TD3
@@ -22,12 +23,12 @@ def eval_policy(policy, eval_env, seed, eval_episodes=10):
     total_reward = 0
     for _ in range(eval_episodes):
         eval_episodes_timestep = 0
-    
+        begin_time = time.time()
         state, done = eval_env.reset(eval_episodes_timestep), False
         while not done:
             eval_episodes_timestep += 1
             action = policy.select_action(np.array(state))
-            state, reward, done, _ = eval_env.step(action, eval_episodes_timestep)
+            state, reward, done, _ = eval_env.step(action, eval_episodes_timestep, begin_time)
             total_reward += reward
     avg_reward = total_reward / eval_episodes_timestep
 
@@ -94,17 +95,21 @@ def td3_training(env, load_model, save_model, seed, discount, tau, batch_size, p
     replay_buffer = utils.ReplayBuffer(state_dim, action_dim)
     
     # Evaluate untrained policy
-    evaluations = [eval_policy(policy, env, seed)]
+    #evaluations = [eval_policy(policy, env, seed)]
+    evaluations = []
 
     episode_timesteps = 0
     state, done = env.reset(episode_timesteps), False
     episode_reward = 0
     episode_num = 0
+    dt = 0
+    #begin_time = time.time()
 
     for t in range(int(max_timesteps)):
         
         episode_timesteps += 1
 
+        #begin_time = time.time()
         # Select action randomly or according to policy
         if t < start_timesteps:
             action = env.action_space.sample()
@@ -115,7 +120,7 @@ def td3_training(env, load_model, save_model, seed, discount, tau, batch_size, p
             ).clip(-max_action, max_action)
 
         # Perform action
-        next_state, reward, done, _ = env.step(action, episode_timesteps) 
+        next_state, reward, done, _ = env.step(action, episode_timesteps, dt) 
         done_bool = float(done) if episode_timesteps < env._max_episode_steps else 0
         
         # Store data in replay buffer
@@ -123,6 +128,7 @@ def td3_training(env, load_model, save_model, seed, discount, tau, batch_size, p
 
         state = next_state
         episode_reward += reward
+        dt += 0.01
 
         # Train agent after collecting sufficient data
         if t >= start_timesteps:
@@ -132,6 +138,7 @@ def td3_training(env, load_model, save_model, seed, discount, tau, batch_size, p
             # +1 to account for 0 indexing. +0 on ep_timesteps since it will increment +1 even if done=True
             print(f"Total T: {t+1} Episode Num: {episode_num+1} Episode T: {episode_timesteps} Reward: {episode_reward:.3f}")
             # Reset environment
+            dt = 0
             episode_timesteps = 0
             state, done = env.reset(episode_timesteps), False
             episode_reward = 0
@@ -149,18 +156,18 @@ def td3_training(env, load_model, save_model, seed, discount, tau, batch_size, p
 if __name__ == '__main__':
     rospy.init_node('ur5e_td3_v2',
                     anonymous=True)
-    env = StartOpenAI_ROS_Environment('UR5eTask-v3')
+    env = StartOpenAI_ROS_Environment('UR5eTask-v4')
     td3_training(env, 
                 load_model=False, 
                 save_model=False,
-                start_timesteps=25e3, 
-                expl_noise=0.001,
+                start_timesteps=50, 
+                expl_noise=0.01,
                 tau=0.005,
                 seed=0,
                 discount=0.99,
-                batch_size=256,
+                batch_size=64,
                 policy_noise=0.002,
-                policy_freq=2,
+                policy_freq=30,
                 noise_clip=0.005,
                 eval_freq=5e3,
                 max_timesteps=1e6,

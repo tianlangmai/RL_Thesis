@@ -10,6 +10,7 @@ from sensor_msgs.msg import JointState
 from openai_ros_common import ROSLauncher
 from task_commons import LoadYamlFileParamsTest
 import os
+import time
 
 class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
     def __init__(self):
@@ -44,7 +45,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         rospy.logdebug("Enter TaskEnv")
 
         # The necessary parameters which will be included in specific yaml file in the future
-        self.n_actions = 3
+        self.n_actions = 12
         self.n_observations = 4
         self.position_ee_max = 1.0
         self.position_ee_min = -1.0
@@ -60,9 +61,9 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         #self.w_xaxis = -7
         #self.w_yaxis = -3
         self.ee_max_distance = 0.28
-        self.weight_distance = 100
+        self.weight_distance = 10000
         #self.w_zaxis = -5
-        self.action_bound = 0.02
+        self.action_bound = 0.0001
         action_upper = np.array([self.action_bound] * self.n_actions)
         self.action_space = spaces.Box(-action_upper, action_upper)
         self.reference_trajectory = self.set_reference_array(self.startpoint, self.desired_goal, 100)
@@ -72,6 +73,18 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         observations_low_range = np.array(
             [self.position_ee_min]*self.n_observations)
 
+        self.a1 = 0.2449
+        self.b1 = -0.4595
+        self.c1 = -0.1396
+        self.d1 = 0.5448
+        self.a2 = -0.0168
+        self.b2 = 0.0315
+        self.c2 = 0.0094
+        self.d2 = -1.6615
+        self.a3 = 0.0179
+        self.b3 = -0.0336
+        self.c3 = -0.0102
+        self.d3 = -2.0051
         #high = np.array([observations_high_range])
         #low = np.array([observations_low_range])
 
@@ -124,7 +137,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         rospy.logdebug("Init Env Variable...")
         rospy.logdebug("Init Env Variable...END")
 
-    def _set_action(self, action):
+    def _set_action(self, action, dt):
         """Based on the sampled action to make the robot move
 
         Args:
@@ -132,20 +145,21 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
             command which is applied into the robot
         """
 
-        delta_joint_angle = [0.0]*3
+        poly_dev = [0.0]*12
 
-         
-        delta_joint_angle[0] = action[0]
-        self.last_action = "shoulder_pan_joint+-"  
-        delta_joint_angle[1] = action[1]
-        self.last_action = "shoulder_lift_joint+-"
-         
-        delta_joint_angle[2] = action[2]
-        self.last_action = "elbow_joint+-"
+        for i in range(12):
+            poly_dev[i] = action[i]
         
         joints_angle = copy.deepcopy(self.last_joints_angle)
-        for i in range(3):
-            joints_angle[i] += delta_joint_angle[i]
+        #for i in range(3):
+            #joints_angle[i] += delta_joint_angle[i]
+        #current_time = time.time()
+        #dt = current_time - begin_time
+        #print(dt)
+        #self.dt = t
+        joints_angle[0] = (self.a1+poly_dev[0])*(dt**3) + (self.b1+poly_dev[1])*(dt**2) + (self.c1+poly_dev[2])*dt + self.d1+poly_dev[3]
+        joints_angle[1] = (self.a2+poly_dev[4])*(dt**3) + (self.b2+poly_dev[5])*(dt**2) + (self.c2+poly_dev[6])*dt + self.d2+poly_dev[7]
+        joints_angle[2] = (self.a3+poly_dev[8])*(dt**3) + (self.b3+poly_dev[9])*(dt**2) + (self.c3+poly_dev[10])*dt + self.d3+poly_dev[11]
 
         joints_action = self.create_action_joints(joints_angle)
         self.movement_result = self.set_trajectory_joints(joints_action)
@@ -283,7 +297,7 @@ class TaskEnv(robot_env.UR5eEnv, utils.EzPickle):
         """              
 
         if movement_result:
-            position_similar = np.all(np.isclose(self.reference_trajectory[count], current_pos, atol=0.01))
+            position_similar = np.all(np.isclose(self.reference_trajectory[count], current_pos, atol=0.005))
             #startpoint = copy.deepcopy(self.startpoint)
             #desired_goal = copy.deepcopy(self.desired_goal)
             #reference_trajectory = self.set_reference_array(startpoint, desired_goal, 100)

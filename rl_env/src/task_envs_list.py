@@ -222,10 +222,10 @@ def RegisterOpenAI_Ros_Env(task_env, max_episode_steps=10000):
             max_episode_steps = max_episode_steps,
         )
     
-    elif task_env == 'UR5eTask-v3':
+    elif task_env == 'UR5eTask-v4':
         register(
             id = task_env,
-            entry_point='task_env_con:TaskEnv',
+            entry_point='env_mi:TaskEnv',
             max_episode_steps = max_episode_steps,
         )
 

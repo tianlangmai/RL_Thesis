@@ -48,7 +48,7 @@ class RobotGazeboEnv(gym.Env):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
-    def step(self, action, count):
+    def step(self, action, count, dt):
         """
         Function executed each time step.
         Here we get the action execute it in a time step and retrieve the
@@ -64,7 +64,7 @@ class RobotGazeboEnv(gym.Env):
         rospy.logdebug("START STEP OpenAIROS")
 
         self.gazebo.unpauseSim()
-        self._set_action(action)
+        self._set_action(action, dt)
         self.gazebo.pauseSim()
         obs = self._get_obs(count)
         done = self._is_done(obs, count)
